@@ -20,72 +20,46 @@ from lightgbm import LGBMClassifier
 from streamlit_shap import st_shap
 
 
-
+# Pour  initialiser les bibliothèques JavaScript de SHAP 
 shap.initjs()
-shap.getjs()
-# from streamlit.hashing import _CodeHasher
+
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
-PATH = 'C:/Users/PERFECTO/PROJET_7_Streamlit/'
+#PATH = 'C:/Users/PERFECTO/PROJET_7_Streamlit/'
 
-# Chargeons les datasets
-
-#X_train_1 = pd.read_csv('X_train_smtomek_sd.csv')
-# On prend 'X_train_sd_df.csv' scindé en 3 volumes
-X_tr_1 = pd.read_csv('X_train_sd_feat_1.csv')
-X_tr_2 = pd.read_csv('X_train_sd_feat_2.csv')
-X_tr_3 = pd.read_csv('X_train_sd_feat_3.csv')
-X_train_1 = pd.concat([X_tr_1,X_tr_2,X_tr_3])
-y_train_1 = pd.read_csv('y_train_df_feat.csv')
-
-#X_valid_1 = pd.read_csv('X_valid_smtomek_sd.csv')
-# On scinde 'X_valid_smtomek_sd.csv' trop volumineux en 2
-X_vl_1 = pd.read_csv('X_valid_sd_feat_1.csv')
-X_vl_2 = pd.read_csv('X_valid_sd_feat_2.csv')
-X_valid_1 = pd.concat([X_vl_1,X_vl_2])
-y_valid_1 = pd.read_csv('y_valid_df_feat.csv' )
-
+# Chargeons le dataset
 X_test = pd.read_csv("X_test_feat_new.csv")
 
-
-
 # Chargeons le modèle
-
-mon_best_model = joblib.load("proj_7_model")
+mon_best_model = joblib.load("PROJECT_7_MODEL")
 
 ## La prédiction
 y_pred_model = mon_best_model.predict(X_test)
 y_pred_model_df = pd.DataFrame(y_pred_model, columns=['y_pred_test'])
 
-# y_pred_model_proba est la probabilité que l'instance de données appartienne à chaque classe.
+# y_pred_model_proba est la probabilité que l'instance de données appartienne à 
+#chaque classe.
 y_pred_model_proba = mon_best_model.predict_proba(X_test)
-#y_pred_model_proba
 
 ## y_pred_model_proba en DataFrame
 y_pred_model_proba_df = pd.DataFrame(y_pred_model_proba, columns=['proba_classe_0', 'proba_classe_1'])
 
-## Il y a plusieurs personnes qui représent un défaut de paiement de plus de 60%
-#y_pred_model_proba_df[y_pred_model_proba_df['proba_classe_1'] > 0.6].sort_values(by='proba_classe_1', ascending=False)
 
-# Les valeurs SHAP estiment l'impact d'une fonctionnalité sur les prédictions 
-# tandis que l'importance des fonctionnalités estime l'impact d'une 
-# fonctionnalité sur l'ajustement du modèle.
+#Les valeurs SHAP montrent comment chaque fonctionnalité affecte chaque 
+#prédiction finale, l'importance de chaque fonctionnalité par rapport aux 
+#autres et la dépendance du modèle à l'égard de l'interaction entre les 
+#fonctionnalités.
 
-shap.initjs()
+#Les valeurs SHAP quantifient la contribution de chaque caractéristique (feature)
+#à la prédiction d'un modèle de machine learning, en se basant sur la théorie 
+#des jeux de Shapley.
+
 explainer = shap.TreeExplainer(mon_best_model)
 shap_values = explainer.shap_values(X_test)
 
-# Shap_values pour la classe 0 et la classe 1
-#shap_values
-
-# Shap_values uniquement pour la classe 1
-#shap_values[1]
-
-# shap_values_df correspond au DataFrame issu de shap_values[1]
-shap_values_df = pd.DataFrame(data=shap_values[1], columns=X_test.columns)
-#shap_values_df.shape
-
-
+# shap_values_df correspond au DataFrame issu de shap_values
+#shap_values_df = pd.DataFrame(data=shap_values[1], columns=X_test.columns)
+shap_values_df = pd.DataFrame(data=shap_values, columns=X_test.columns)
 
 data_groupes = pd.concat([y_pred_model_proba_df['proba_classe_1'], shap_values_df], axis=1)
 #data_groupes.shape
@@ -101,7 +75,7 @@ data_groupes['classe_clients'] = pd.qcut(data_groupes.proba_classe_1,q=5,
                                                   '25%_30%',
                                                   '31%_et_plus'])
 # On pratique la moyenne de chaque classe
-data_groupes_mean = data_groupes.groupby(['classe_clients']).mean()
+data_groupes_mean = data_groupes.groupby(['classe_clients'], observed=False).mean()
 data_groupes_mean = data_groupes_mean.rename_axis('classe_clients').reset_index()                                                  
 le_max = X_test.shape[0]-1                                                 
                                                   
@@ -190,7 +164,8 @@ elif page == pages[3]:
         fig, ax = plt.subplots(figsize=(6, 4))
         the_group = data_groupes[data_groupes['classe_clients']==groupe_du_client[0]].drop(labels=['classe_clients', "proba_classe_1"], axis=1)
         shap_values_group = explainer.shap_values(the_group)
-        shap.summary_plot(shap_values_group[1], the_group)
+        #shap.summary_plot(shap_values_group[1], the_group)
+        shap.summary_plot(shap_values_group, the_group)
         st.pyplot(fig)
     
 elif page == pages[4]:
@@ -205,8 +180,8 @@ elif page == pages[4]:
         st.write()
         st.write("##### La première visualisation explique comment le modèle est arrivé à la prédiction faite ")
         #fig, ax = plt.subplots(figsize=(6, 4))
-        st_shap(shap.force_plot(explainer.expected_value[1], 
-                shap_values[1][idx,:], 
+        st_shap(shap.force_plot(explainer.expected_value, 
+                shap_values[idx,:], 
                 X_test[X_test.index == idx], 
                 link='logit',
                 figsize=(20, 8),
@@ -218,8 +193,8 @@ elif page == pages[4]:
         st.write("##### La deuxième visualisation aide à identifier les principales caractéristiques ayant un pouvoir de décision élevé dans le modèle au niveau individuel")
         st.write("##### Ce graphique est une meilleure visualisation de l'importance des caractéristiques de tous les prédicteurs chez chaque individu.")        
         fig, ax = plt.subplots(figsize=(6, 4))
-        shap.decision_plot(explainer.expected_value[1], 
-                   shap_values[1][idx,:], 
+        shap.decision_plot(explainer.expected_value, 
+                   shap_values[idx,:], 
                    X_test[X_test.index == idx], 
                    feature_names=X_test.columns.to_list(),
                    feature_order='importance',
@@ -240,7 +215,7 @@ elif page == pages[4]:
          les_groupes_plus = ['Client','Groupe 1 avec 16%_et_moins', 'Groupe 2 avec 17%_20%', 'Groupe 3 avec 21%_24%', 'Groupe 4 avec 25%_30%',
                              'Groupe 5 avec 31%_et_plus']
          fig, ax = plt.subplots(figsize=(6, 4))
-         shap.decision_plot(explainer.expected_value[1], 
+         shap.decision_plot(explainer.expected_value, 
                    comparaison_client_groupe_numpy, 
                    feature_names=comparaison_client_groupe.drop(labels=['classe_clients', "proba_classe_1"], axis=1).columns.to_list(),
                    feature_order='importance',
