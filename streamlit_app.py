@@ -24,7 +24,7 @@ from streamlit_shap import st_shap
 shap.initjs()
 
 
-st.set_option('deprecation.showPyplotGlobalUse', False)
+#st.set_option('deprecation.showPyplotGlobalUse', False)
 #PATH = 'C:/Users/PERFECTO/PROJET_7_Streamlit/'
 
 # Chargeons le dataset
