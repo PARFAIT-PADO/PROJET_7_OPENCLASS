@@ -19,20 +19,9 @@ Spécifications du dashboard Celui-ci devra contenir au minimum les fonctionnali
 Permettre de visualiser le score et l’interprétation de ce score pour chaque client de façon intelligible pour une personne non experte en data science.
 Permettre de visualiser des informations descriptives relatives à un client (via un système de filtre).
 Permettre de comparer les informations descriptives relatives à un client à l’ensemble des clients ou à un groupe de clients similaires.
-Livrables
 
-Le dashboard interactif répondant aux spécifications ci-dessus et l’API de prédiction du score, déployées chacunes sur le cloud.
-Un dossier sur un outil de versioning de code contenant :
-Le code de la modélisation (du prétraitement à la prédiction)
-Le code générant le dashboard
-Le code permettant de déployer le modèle sous forme d'API
-Une note méthodologique décrivant :
-La méthodologie d'entraînement du modèle (2 pages maximum)
-La fonction coût métier, l'algorithme d'optimisation et la métrique d'évaluation (1 page maximum)
-L’interprétabilité globale et locale du modèle (1 page maximum)
-Les limites et les améliorations possibles (1 page maximum)
-Un support de présentation pour la soutenance, détaillant le travail réalisé.
-<<<<<<< HEAD
-=======
-# Project_7_OpenClassRooms
->>>>>>> 004a999 (first commit)
+
+Ici je présente
+Le dashboard interactif répondant aux spécifications ci-dessus et déployé sur le cloud.
+
+
