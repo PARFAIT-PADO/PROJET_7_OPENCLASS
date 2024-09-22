@@ -9,4 +9,4 @@ seaborn
 matplotlib
 xplotter
 streamlit-shap
-
+ipython
